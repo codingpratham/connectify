@@ -10,6 +10,7 @@ if(prisma){
 }
 
 const app =express()
+app.use(express.static('avatars'))
 app.use(cookieParser())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

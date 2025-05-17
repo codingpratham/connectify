@@ -1,6 +1,7 @@
 const router = require('express').Router();
-import { createAccount, login, logout, onBoard } from '../controller/auth.controller';
-import { protectRoute } from '../middleware/auth';
+import { createAccount, login, logout} from '../controller/auth.controller';
+import { onBoard } from '../controller/onboarding.controller';
+import { protectRoute } from '../middleware/auth.middleware';
 import { upload } from '../middleware/upload';
 
 router.post('/register', createAccount);
