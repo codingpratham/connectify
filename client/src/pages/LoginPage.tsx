@@ -1,7 +1,44 @@
 import { ShipWheelIcon } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
 
 const LoginPage = () => {
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const result = response.json();
+
+      if (!response.ok) {
+        throw new Error("Failed to login");
+      }
+
+      console.log("Login successful:", result);
+
+      alert("Login successful!");
+
+      window.location.href = "/"; // Use `navigate("/")` if using React Router
+    } catch (error) {
+      console.error("Error logging in:", error);
+    }
+  }
+
+
   return (
     <div className="h-screen flex items-center justify-center bg-[#181212] p-4 sm:p-6 md:p-8 text-white">
       <div className="border border-[#1A2420] flex flex-col lg:flex-row w-full bg-[#181212] max-w-5xl mx-auto rounded-xl shadow-lg overflow-hidden">
@@ -15,7 +52,7 @@ const LoginPage = () => {
             </span>
           </div>
 
-          <form className="space-y-6">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <h2 className="text-xl font-semibold">Welcome Back</h2>
               <p className="text-sm text-white/70">
@@ -31,6 +68,8 @@ const LoginPage = () => {
                   placeholder="hello@example.com"
                   className="w-full px-4 py-2 bg-transparent border border-[#2D2727] text-white placeholder-gray rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#2D2727]"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -41,12 +80,14 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   className="w-full px-4 py-2 bg-transparent border border-[#2D2727] text-white placeholder-gray rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#2D2727]"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-2 rounded-3xl bg-[#1DB853] text-black font-semibold hover:bg-[#17a347] transition"
+                  className="w-full py-2 rounded-3xl bg-[#1DB853] text-black font-semibold hover:bg-[#17a347] transition"
               >
                 Sign In
               </button>
