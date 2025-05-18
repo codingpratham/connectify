@@ -24,6 +24,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
 
     const result = await response.json();
+    localStorage.setItem("token", result.token);
+    console.log("Token:", result.token);
+    localStorage.setItem('isOnboarded', 'false');
+    localStorage.setItem('userId', result.userId);
+    localStorage.setItem("FullName", fullName);
+
+    
 
     if (!response.ok) {
       throw new Error(result?.message || "Failed to create account");
@@ -34,7 +41,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     alert("Account created successfully! Please check your email to verify your account.");
 
     
-    window.location.href = "/"; // Use `navigate("/")` if using React Router
+    window.location.href = "/onboarding"; // Use `navigate("/")` if using React Router
   } catch (error) {
     console.error("Error creating account:", error);
     

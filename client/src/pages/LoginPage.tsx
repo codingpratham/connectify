@@ -22,7 +22,8 @@ const LoginPage = () => {
         }),
       });
 
-      const result = response.json();
+      const result = await response.json();
+      localStorage.setItem("token", result.token);
 
       if (!response.ok) {
         throw new Error("Failed to login");

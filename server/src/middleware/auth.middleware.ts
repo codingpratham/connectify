@@ -1,50 +1,32 @@
-import { prisma } from "../lib/prisma.js";
-import { verifyToken } from "../lib/jwt.js";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-interface JwtPayload {
-  userId: string;
-  email?: string;
-}
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-export const protectRoute = async (req: Request, res: Response, next: NextFunction) => {
+export const protectRoute = (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
   try {
-    let token: string | undefined;
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
 
-    // Get token from Authorization header or cookie
-    if (req.headers.authorization?.startsWith("Bearer ")) {
-      token = req.headers.authorization.split(" ")[1];
-    } else if (req.cookies?.jwt) {
-      token = req.cookies.jwt;
+    if (!decoded.userId) {
+      return res.status(401).json({ message: "Unauthorized: Invalid token" });
     }
 
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized - No token provided" });
-    }
+    req.userId = decoded.userId; // ⬅️ Attach userId to request
 
-    const decoded = verifyToken(token) as JwtPayload;
-
-    if (!decoded || !decoded.userId) {
-      return res.status(401).json({ message: "Unauthorized - Invalid token" });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: { id: true, email: true, fullName: true },
-    });
-
-    if (!user) {
-      return res.status(401).json({ message: "Unauthorized - User not found" });
-    }
-
-    // Attach user and userId to request
-    (req as any).user = user;
-    (req as any).userId = user.id;
-
-    console.log("Authenticated user:", user);
+    console.log("Decoded JWT:", decoded); // ✅ Log to debug
+    console.log("User ID from token:", req.userId); // ✅ Log to debug
+    
     next();
   } catch (error) {
-    console.error("Error in protectRoute middleware:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("JWT error:", error);
+    return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };
