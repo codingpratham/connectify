@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import router from './routes/auth.route';
+import userRouter from './routes/user.route';
 import { prisma } from './lib/prisma';
 import cookieParser from 'cookie-parser';
 
@@ -20,6 +21,7 @@ app.use(cors({
     credentials:true,
 }))
 app.use("/api/auth",router)
+app.use("/api/user",userRouter)
 
 app.listen(3000, () => {
     console.log('Server is running on port 3000');

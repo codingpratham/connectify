@@ -24,4 +24,30 @@ model User  {
   isOnboarded Boolean    @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+
+  sentRequests FriendRequest[] @relation("Sender")
+  receivedRequests FriendRequest[] @relation("Receiver")
+
+  friends          User[]           @relation("UserFriends")
+  friendOf         User[]           @relation("UserFriends")
+  
+}
+
+model FriendRequest {
+  id          String   @id @default(cuid())
+  senderId    String
+  receiverId  String
+  status      status?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender      User     @relation("Sender", fields: [senderId], references: [id])
+  receiver    User     @relation("Receiver", fields: [receiverId], references: [id])
+
+}
+
+enum status {
+  PENDING
+  ACCEPTED
+  REJECTED
 }

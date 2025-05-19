@@ -30,7 +30,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     localStorage.setItem('userId', result.userId);
     localStorage.setItem("FullName", fullName);
 
-    
+
 
     if (!response.ok) {
       throw new Error(result?.message || "Failed to create account");

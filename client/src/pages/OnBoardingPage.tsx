@@ -9,10 +9,11 @@ const OnboardingPage = () => {
   const [profilePic, setProfilePic] = useState("");
   const navigate = useNavigate();
 
-  useEffect(()=>{
-    const storedName = localStorage.getItem("fullName");
-    if (storedName) setFullName(storedName);
-  },[])
+  useEffect(() => {
+    const isOnboarded = localStorage.getItem("isOnboarded") === "true";
+    if (isOnboarded) navigate("/");
+
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +39,11 @@ const OnboardingPage = () => {
         throw new Error("Failed to complete onboarding");
       }
 
-      console.log("Onboarding completed successfully");
-      alert("Onboarding completed successfully!");
+      localStorage.setItem("isOnboarded", "true");
       navigate("/");
+
+      localStorage.setItem("profilePic", profilePic);
+      localStorage.setItem("name", fullName);
     } catch (error) {
       console.error("Error completing onboarding:", error);
     }
@@ -55,9 +58,12 @@ const OnboardingPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0D0D0D] px-4">
       <div className="w-full max-w-md bg-black rounded-xl px-6 py-10 shadow-lg text-white">
-        <h2 className="text-2xl font-semibold text-center mb-6">
+        <h2 className="text-2xl font-semibold text-center mb-2">
           Complete Your Profile
         </h2>
+        <h3 className="text-lg text-center text-gray-400 mb-6">
+          Welcome, {fullName} 👋
+        </h3>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="flex flex-col items-center gap-3 mb-6">
@@ -87,14 +93,15 @@ const OnboardingPage = () => {
             </button>
           </div>
 
+          {/* Full Name (non-editable) */}
           <div>
             <label className="text-sm block mb-1">Full Name</label>
             <input
               type="text"
-              placeholder="Beth Doe"
-              className="w-full px-4 py-2 bg-[#0D0D0D] border border-white/10 text-white rounded-full placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#1DB853]"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
+              placeholder="John Doe"
+              className="w-full px-4 py-2 bg-[#1a1a1a] border border-white/10 text-white rounded-full placeholder-white/40 opacity-70 cursor-not-allowed"
             />
           </div>
 
