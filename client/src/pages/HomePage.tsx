@@ -1,20 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
-import {
-  getOutgoingFriendReqs,
-  getRecommendedUsers,
-  getUserFriends,
-  sendFriendRequest,
-} from "../lib/api";
-
 import { CheckCircleIcon, MapPinIcon, UserPlusIcon, UsersIcon } from "lucide-react";
-
 
 import FriendCard from "../components/FriendCard";
 import NoFriendsFound from "../components/NoFriendsFound";
 
 type User = {
-
   id?: string;
   fullName: string;
   profilePic: string;
@@ -23,7 +14,7 @@ type User = {
 };
 
 type FriendRequest = {
-  _id: string;
+  id: string;
   receiver: User;
   sender: User;
 };
@@ -37,74 +28,123 @@ const HomePage = () => {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [sendingRequestId, setSendingRequestId] = useState<string | null>(null);
 
+  const token = localStorage.getItem("token");
+  localStorage.getItem("profilePic");
+
   // Fetch friends
   useEffect(() => {
-    setLoadingFriends(true);
-    getUserFriends()
-      .then((data) => {
+    const getUserFriends = async () => {
+      try {
+        setLoadingFriends(true);
+        const res = await fetch("http://localhost:3000/api/user/friends", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
         setFriends(data || []);
-      })
-      .finally(() => setLoadingFriends(false));
-  }, []);
+      } catch (error) {
+        console.error("Failed to fetch friends", error);
+      } finally {
+        setLoadingFriends(false);
+      }
+    };
+    getUserFriends();
+  }, [token]);
 
   // Fetch recommended users
   useEffect(() => {
-    setLoadingUsers(true);
-    getRecommendedUsers()
-      .then((data) => {
+    const getRecommended = async () => {
+      try {
+        setLoadingUsers(true);
+        const res = await fetch("http://localhost:3000/api/user", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
         setRecommendedUsers(data || []);
-      })
-      .finally(() => setLoadingUsers(false));
-  }, []);
+      } catch (error) {
+        console.error("Failed to fetch recommended users", error);
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    getRecommended();
+  }, [token]);
 
   // Fetch outgoing friend requests
   useEffect(() => {
-    getOutgoingFriendReqs()
-      .then((data) => {
+    const fetchOutgoingRequests = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/user/outgoing-friend-requests", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
         setOutgoingFriendReqs(data || []);
-      });
-  }, []);
+      } catch (error) {
+        console.error("Failed to fetch outgoing friend requests", error);
+      }
+    };
+    fetchOutgoingRequests();
+  }, [token]);
 
-  // Update set of outgoing request recipient ids
+  // Track sent request IDs
   useEffect(() => {
     const outgoingIds = new Set<string>();
-    if (outgoingFriendReqs.length > 0) {
-      outgoingFriendReqs.forEach((req) => {
-        outgoingIds.add(req.receiver.id as string);
-      });
-    }
+    outgoingFriendReqs.forEach((req) => {
+      if (req.receiver?.id) {
+        outgoingIds.add(req.receiver.id);
+      }
+    });
     setOutgoingRequestsIds(outgoingIds);
   }, [outgoingFriendReqs]);
 
-  const handleSendRequest = (userId: string) => {
-    setSendingRequestId(userId);
-    sendFriendRequest(userId)
-      .then(() => {
-        // Refetch outgoing friend requests after success
-        return getOutgoingFriendReqs();
-      })
-      .then((data) => {
-        setOutgoingFriendReqs(data || []);
-      })
-      .finally(() => setSendingRequestId(null));
+  const handleSendRequest = async (userId: string) => {
+    try {
+      setSendingRequestId(userId);
+      await fetch(`http://localhost:3000/api/user/friend-request/${userId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Refetch outgoing requests
+      const res = await fetch("http://localhost:3000/api/user/outgoing-friend-requests", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      setOutgoingFriendReqs(data || []);
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+    } finally {
+      setSendingRequestId(null);
+    }
   };
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-[#171111] h-screen text-white">
+    <div className="p-4 sm:p-6 lg:p-8 bg-[#171111] h-screen text-white overflow-y-auto">
       <div className="container mx-auto space-y-10">
-        <div className="flex items-center justify-between flex-wrap gap-4 border-white">
-  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
-  <Link
-  to="/notifications"
-  className="inline-flex items-center gap-2 px-4 py-1.5 border border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-black transition"
->
-  <UsersIcon className="size-4" />
-  Friend Requests
-</Link>
-
-</div>
-
-
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Friends</h2>
+          <Link
+            to="/notifications"
+            className="inline-flex items-center gap-2 px-4 py-1.5 border border-white text-white rounded-full text-sm font-medium hover:bg-white hover:text-black transition"
+          >
+            <UsersIcon className="size-4" />
+            Friend Requests
+          </Link>
+        </div>
 
         {loadingFriends ? (
           <div className="flex justify-center py-12">
@@ -159,7 +199,6 @@ const HomePage = () => {
                         <div className="avatar size-16 rounded-full">
                           <img src={user.profilePic} alt={user.fullName} />
                         </div>
-
                         <div>
                           <h3 className="font-semibold text-lg">{user.fullName}</h3>
                           {user.location && (
@@ -171,14 +210,11 @@ const HomePage = () => {
                         </div>
                       </div>
 
-
                       {user.bio && <p className="text-sm opacity-70">{user.bio}</p>}
 
-                      {/* Action button */}
                       <button
-                        className={`btn w-full mt-2 ${
-                          hasRequestBeenSent ? "btn-disabled" : "btn-primary"
-                        } `}
+                        className={`btn w-full mt-2 ${hasRequestBeenSent ? "btn-disabled" : "btn-primary"
+                          } `}
                         onClick={() => user.id && handleSendRequest(user.id)}
                         disabled={hasRequestBeenSent || isSending || !user.id}
                       >
@@ -188,13 +224,19 @@ const HomePage = () => {
                             Request Sent
                           </>
                         ) : isSending ? (
-                          <>
-                            Sending...
-                          </>
+                          <>Sending...</>
                         ) : (
                           <>
-                            <UserPlusIcon className="size-4 mr-2" />
-                            Send Friend Request
+                            <div className="flex justify-center mt-4">
+                              <button className="flex items-center bg-green-500 hover:bg-green-600 text-white rounded-full px-4 py-2 transition">
+                                <div className="flex items-center justify-center w-5 h-5 bg-green-600 rounded-full mr-2">
+                                  <UserPlusIcon className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="text-sm font-medium">Send Friend Request</span>
+                              </button>
+                            </div>
+
+
                           </>
                         )}
                       </button>

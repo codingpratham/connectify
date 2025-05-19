@@ -2,7 +2,7 @@
 import { Link } from "react-router";
 
 
-const FriendCard = ( friend : any) => {
+const FriendCard = ({ friend }: any) => {
   return (
     <div className="card bg-base-200 hover:shadow-md transition-shadow">
       <div className="card-body p-4">
@@ -14,13 +14,7 @@ const FriendCard = ( friend : any) => {
           <h3 className="font-semibold truncate">{friend.fullName}</h3>
         </div>
 
-        {/* USER LOCATION */}
-        {friend.location && (
-          <p className="text-sm text-base-content/70">{friend.location}</p>
-        )}
-
-
-        <Link to={`/chat/${friend.id}`} className="btn btn-outline w-full">
+        <Link to={`/chat/${friend._id}`} className="btn btn-outline w-full">
           Message
         </Link>
       </div>
@@ -28,3 +22,4 @@ const FriendCard = ( friend : any) => {
   );
 };
 export default FriendCard;
+
