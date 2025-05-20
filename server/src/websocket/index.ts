@@ -1,52 +1,46 @@
 // websocket/index.ts
 import { Server as WebSocketServer, WebSocket } from 'ws';
-import { Server as HTTPServer } from 'http';
 
-interface Client {
+interface User {
   socket: WebSocket;
-  userId: string;
+  room: string;
 }
 
-const clients = new Map<string, WebSocket>();
+const allSocket: User[] = [];
 
-export const initWebSocket = (server: HTTPServer) => {
+export const initWebSocket = (server: any) => {
   const wss = new WebSocketServer({ server });
 
-  wss.on('connection', (ws: WebSocket) => {
-    let userId = '';
+wss.on('connection',(socket)=>{
 
-    ws.on('message', (message: string) => {
-      try {
-        const data = JSON.parse(message);
+   socket.on('message',(message)=>{
+    //@ts-ignore
+     const parsedMessage = JSON.parse(message)
 
-        if (data.type === 'init') {
-          userId = data.userId;
-          clients.set(userId, ws);
-          console.log(`User ${userId} connected`);
+     if(parsedMessage.type === "join"){
+        allSocket.push({
+            socket,
+            room:parsedMessage.payload.roomId
+        })
+     }
+
+     if(parsedMessage.type === "chat"){
+        let currentUserRoom= null
+        for(let i=0 ; i<allSocket.length ; i++){
+            if(allSocket[i].socket==socket){
+                currentUserRoom=allSocket[i].room
+            }
         }
 
-        if (data.type === 'message') {
-          const recipientSocket = clients.get(data.recipientId);
-          if (recipientSocket && recipientSocket.readyState === WebSocket.OPEN) {
-            recipientSocket.send(JSON.stringify({
-              type: 'message',
-              from: userId,
-              content: data.content,
-            }));
-          }
+        for(let i=0 ; i<allSocket.length ; i++){
+            if(allSocket[i].room == currentUserRoom){
+                allSocket[i].socket.send(parsedMessage.payload.message)
+            }
         }
-      } catch (error) {
-        console.error('Invalid message format:', error);
-      }
-    });
 
-    ws.on('close', () => {
-      if (userId) {
-        clients.delete(userId);
-        console.log(`User ${userId} disconnected`);
-      }
-    });
-  });
+     }
+   })
+})
 
-  console.log('WebSocket server initialized');
+  console.log('✅ WebSocket server initialized');
 };

@@ -27,7 +27,8 @@ const handleSubmit = async (e: React.FormEvent) => {
     localStorage.setItem("token", result.token);
     console.log("Token:", result.token);
     localStorage.setItem('isOnboarded', 'false');
-    localStorage.setItem('userId', result.userId);
+    localStorage.setItem("userId", result.id);
+
     localStorage.setItem("FullName", fullName);
 
 

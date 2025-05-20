@@ -25,8 +25,14 @@ const App = () => {
             {/* Protected Layout Wrapper */}
             <Route element={<Layout showSidebar={true}  />}>
               <Route path="/" element={<HomePage />} />
+            </Route>
+            <Route element={<Layout showSidebar={true}/>}>
               <Route path="/notifications" element={<NotificationsPage />} />
+            </Route>
+            <Route element={<Layout showSidebar={true}/>}>
               <Route path="/friends" element={<FriendPage />} />
+            </Route>
+            <Route element={<Layout showSidebar={false}/>}>
               <Route path="/chat/:id" element={<ChatPage />} />
             </Route>
             
