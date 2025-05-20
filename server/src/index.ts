@@ -4,6 +4,7 @@ import router from './routes/auth.route';
 import userRouter from './routes/user.route';
 import { prisma } from './lib/prisma';
 import cookieParser from 'cookie-parser';
+import http from 'http';
 
 
 if(prisma){
@@ -23,7 +24,9 @@ app.use(cors({
 app.use("/api/auth",router)
 app.use("/api/user",userRouter)
 
+
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
     console.log('http://localhost:3000');
 })
+

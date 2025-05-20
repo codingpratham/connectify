@@ -9,6 +9,7 @@ import PrivateRoute from './components/PrivateRoutes';
 import NotificationsPage from './pages/NotificationPage';
 import FriendPage from './pages/FriendPage';
 import Layout from './components/Layout';
+import ChatPage from './pages/ChatPage';
 
 const App = () => {
   return (
@@ -26,7 +27,9 @@ const App = () => {
               <Route path="/" element={<HomePage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/friends" element={<FriendPage />} />
+              <Route path="/chat/:id" element={<ChatPage />} />
             </Route>
+            
           </Route>
         </Routes>
       </BrowserRouter>
