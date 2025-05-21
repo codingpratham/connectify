@@ -3,6 +3,7 @@ import { prisma } from "../lib/prisma";
 import bcrypt from "bcrypt";
 import { signToken } from "../lib/jwt";
 
+
 export const createAccount = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
 

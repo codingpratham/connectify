@@ -58,7 +58,7 @@ const LoginPage = () => {
             <div>
               <h2 className="text-xl font-semibold">Welcome Back</h2>
               <p className="text-sm text-white/70">
-                Sign in to your account to continue your language journey
+                Sign in to continue connecting with alumni worldwide
               </p>
             </div>
 
@@ -116,10 +116,10 @@ const LoginPage = () => {
             </div>
             <div className="mt-6 space-y-2">
               <h2 className="text-xl font-semibold text-white">
-                Connect with language partners worldwide
+                Chat with alumni worldwide and stay connected
               </h2>
               <p className="text-sm text-white/70">
-                Practice conversations, make friends, and improve your language skills together
+                Chat, make friends, and grow together—one conversation at a time.
               </p>
             </div>
           </div>

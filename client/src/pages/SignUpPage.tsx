@@ -65,7 +65,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div>
             <h2 className="text-xl font-semibold">Create an Account</h2>
             <p className="text-sm text-white/70">
-              Join LangConnect and start your language learning journey
+              Sign up to connect with alumni and grow your network.
             </p>
           </div>
 
@@ -155,10 +155,10 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
             <div className="mt-6 space-y-2">
               <h2 className="text-xl font-semibold text-white">
-                Connect with language partners worldwide
+               Chat with alumni worldwide and stay connected.
               </h2>
               <p className="text-sm text-white/70">
-                Practice conversations, make friends, and improve your language skills together
+                Chat, make friends, and grow together—one conversation at a time.
               </p>
             </div>
           </div>
