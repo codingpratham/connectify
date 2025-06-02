@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { onBoardBody } from "../types/validate";
 
 // Extend Express Request interface to include userId
 declare global {
@@ -11,7 +12,12 @@ declare global {
 }
 
 export const onBoard = async (req: Request, res: Response) => {
-  const { name, bio, location, profilePic } = req.body;
+  const validate = onBoardBody.safeParse(req.body);
+  if (!validate.success) {
+    return res.status(400).json({ message: "Invalid request body" });
+  }
+
+  const { name, bio, location, profilePic } = validate.data;
   const userId = req.userId;
 
   console.log("User ID from token:", userId); // ✅ Log to debug

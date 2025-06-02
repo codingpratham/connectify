@@ -2,26 +2,26 @@ import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 import bcrypt from "bcrypt";
 import { signToken } from "../lib/jwt";
+import { loginBody, signUpbody } from "../types/validate";
 
 
 export const createAccount = async (req: Request, res: Response) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+  const validation = signUpbody.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ message: "Invalid request body" });
   }
 
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findUnique({ where: { email :validation.data.email } });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(validation.data.password, 10);
     const user = await prisma.user.create({
       data: {
-        fullName: name,
-        email,
+        fullName: validation.data.name,
+        email: validation.data.email,
         password: hashedPassword,
       },
     });
@@ -36,15 +36,17 @@ export const createAccount = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const validate =  loginBody.safeParse(req.body);
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+  if(!validate.success) {
+    return res.status(400).json({ message: "Invalid request body" });
   }
 
+  
+
   try {
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user || !(await bcrypt.compare(password, user.password))) {
+    const user = await prisma.user.findUnique({ where: { email :validate.data.email } });
+    if (!user || !(await bcrypt.compare(validate.data.password, user.password))) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
